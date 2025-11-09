@@ -5,9 +5,27 @@
   background: linear-gradient(135deg, #f4fff4 0%, #e9f2ea 50%, #ffffff 100%);
 }
 
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.home-hero h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  color: #2f3c2f;
+}
+
+.home-hero p {
+  margin: 0;
+  color: #526052;
+  font-size: 1.05rem;
+}
+
 .home-grid {
   flex: 1;
-  margin-top: calc(var(--header-height) + 0.25rem);
+  margin-top: 0.75rem;
   padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 4vw, 3rem) 2rem;
   display: flex;
   flex-direction: column;

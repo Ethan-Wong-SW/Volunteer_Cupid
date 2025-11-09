@@ -80,6 +80,11 @@ const Home = () => {
 
   return (
     <div className="home-shell">
+      <header className="home-hero">
+        <h1>Find Your Perfect Volunteer Opportunity</h1>
+        <p>Connect with organisations looking for your skills and passions.</p>
+      </header>
+
       <div className="home-grid">
         <section className="home-section">
           <header>

@@ -1,21 +1,97 @@
+import { useMemo, useState } from 'react';
 import './Opportunities.css';
 import { allOpportunities } from '../data/opportunities';
 
 const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
   const profileName = profile.name || defaultProfile?.name || 'Volunteer';
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [skillFilter, setSkillFilter] = useState('all');
+
+  const locations = useMemo(() => Array.from(new Set(allOpportunities.map((item) => item.location))), []);
+
+  const skills = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          allOpportunities
+            .flatMap((item) => item.skills || [])
+            .map((skill) => skill.toLowerCase()),
+        ),
+      ).sort(),
+    [],
+  );
+
+  const filteredOpportunities = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return allOpportunities.filter((opportunity) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        opportunity.title.toLowerCase().includes(normalizedSearch) ||
+        opportunity.description.toLowerCase().includes(normalizedSearch) ||
+        opportunity.skills.some((skill) => skill.toLowerCase().includes(normalizedSearch));
+
+      const matchesLocation = locationFilter === 'all' || opportunity.location === locationFilter;
+
+      const matchesSkill =
+        skillFilter === 'all' || opportunity.skills.some((skill) => skill.toLowerCase() === skillFilter);
+
+      return matchesSearch && matchesLocation && matchesSkill;
+    });
+  }, [locationFilter, skillFilter, searchTerm]);
+
   return (
     <section className="opportunities-shell">
       <header className="opportunities-hero">
         <p className="eyebrow">All opportunities</p>
-        <h1>Find the next place to lend a hand, {profileName}.</h1>
+        <h1>Find the next place to lend a hand.</h1>
         <p>Browse every opportunity currently accepting volunteers and apply when one speaks to you.</p>
       </header>
 
+      <div className="opportunities-filters" role="search">
+        <label className="filter-field">
+          <span>Search</span>
+          <input
+            type="search"
+            placeholder="Role, skill, cause…"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </label>
+        <label className="filter-field">
+          <span>Location</span>
+          <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
+            <option value="all">All locations</option>
+            {locations.map((location) => (
+              <option key={location} value={location}>
+                {location}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="filter-field">
+          <span>Skills</span>
+          <select value={skillFilter} onChange={(event) => setSkillFilter(event.target.value)}>
+            <option value="all">All skills</option>
+            {skills.map((skill) => (
+              <option key={skill} value={skill}>
+                {skill.replace(/(^\w|\s\w)/g, (s) => s.toUpperCase())}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       <div className="opportunities-list">
-        {allOpportunities.map((opportunity) => (
-          <OpportunityCard key={opportunity.id} opportunity={opportunity} onApply={onApply} />
-        ))}
+        {filteredOpportunities.length ? (
+          filteredOpportunities.map((opportunity) => (
+            <OpportunityCard key={opportunity.id} opportunity={opportunity} onApply={onApply} />
+          ))
+        ) : (
+          <p className="opportunities-empty">No opportunities match your filters right now.</p>
+        )}
       </div>
     </section>
   );
