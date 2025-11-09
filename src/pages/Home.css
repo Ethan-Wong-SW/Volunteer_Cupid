@@ -1,0 +1,130 @@
+.home-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f4fff4 0%, #e9f2ea 50%, #ffffff 100%);
+}
+
+.home-grid {
+  flex: 1;
+  margin-top: calc(var(--header-height) + 0.25rem);
+  padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 4vw, 3rem) 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.home-section {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid #dfe6dd;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 15px 40px rgba(76, 175, 80, 0.12);
+}
+
+.home-section > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.home-section h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #2f3c2f;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #4caf50;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.home-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2eddf;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fdfefe 0%, #f5fbf6 100%);
+  align-items: center;
+}
+
+.home-card__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  border: 1px solid #d5e4d2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.home-card__icon span {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px dashed #8cc590;
+  display: inline-block;
+}
+
+.home-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.home-card p {
+  margin: 0;
+  color: #526052;
+  font-size: 0.95rem;
+}
+
+.home-card__date {
+  margin-top: 0.35rem;
+  font-weight: 600;
+  color: #4caf50;
+}
+
+.home-card__favorite {
+  border: none;
+  background: #ffffff;
+  border-radius: 999px;
+  width: 44px;
+  height: 44px;
+  font-size: 1.1rem;
+  color: #e06a6a;
+  cursor: pointer;
+}
+
+.home-card__favorite.active {
+  background: #ffecec;
+  color: #c62828;
+  box-shadow: 0 6px 18px rgba(198, 40, 40, 0.2);
+}
+
+@media (max-width: 640px) {
+  .home-card {
+    grid-template-columns: 1fr auto;
+  }
+
+  .home-card__icon {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+
+  .home-card__favorite {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}

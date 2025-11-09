@@ -10,12 +10,6 @@ const DEFAULT_PROFILE = {
   interests: ['environment'],
 };
 
-const NAV_ITEMS = [
-  { route: 'home', label: 'Home', path: '/home' },
-  { route: 'opportunities', label: 'Opportunities', path: '/opportunities' },
-  { route: 'profile', label: 'Profile', path: '/profile' },
-];
-
 const readProfileFromStorage = () => {
   if (typeof window === 'undefined') return DEFAULT_PROFILE;
 
@@ -65,6 +59,11 @@ function App() {
     [],
   );
 
+  const handleSignOut = useCallback(() => {
+    setIsAuthenticated(false);
+    navigate('/login', { replace: true });
+  }, [navigate]);
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
@@ -72,7 +71,7 @@ function App() {
         path="/login"
         element={isAuthenticated ? <Navigate to="/home" replace /> : <Login onComplete={handleLoginSuccess} />}
       />
-      <Route element={<ProtectedLayout isAuthenticated={isAuthenticated} />}>
+      <Route element={<ProtectedLayout isAuthenticated={isAuthenticated} onSignOut={handleSignOut} />}>
         <Route path="/home" element={<HomePage />} />
         <Route
           path="/opportunities"
@@ -88,28 +87,35 @@ function App() {
   );
 }
 
-function ProtectedLayout({ isAuthenticated }) {
+function ProtectedLayout({ isAuthenticated, onSignOut }) {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   return (
     <div className="app">
-      <Header />
+      <Header onSignOut={onSignOut} />
       <main>
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }
 
-function Header() {
+const navItems = [
+  { route: 'home', label: 'Discover', path: '/home' },
+  { route: 'opportunities', label: 'Opportunities', path: '/opportunities' },
+  { route: 'profile', label: 'Profile', path: '/profile' },
+];
+
+function Header({ onSignOut }) {
   return (
     <header>
       <h1>Volunteer Cupid</h1>
       <nav>
         <ul>
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <li key={item.route}>
               <NavLink to={item.path} className={({ isActive }) => (isActive ? 'active' : undefined)}>
                 {item.label}
@@ -117,8 +123,19 @@ function Header() {
             </li>
           ))}
         </ul>
+        <button type="button" className="sign-out" onClick={onSignOut}>
+          Sign Out
+        </button>
       </nav>
     </header>
+  );
+}
+
+function Footer() {
+  return (
+    <footer>
+      <p>© 2025 Volunteer Cupid</p>
+    </footer>
   );
 }
 

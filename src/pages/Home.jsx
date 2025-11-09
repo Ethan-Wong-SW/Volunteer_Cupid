@@ -1,21 +1,126 @@
-const Home = () => (
-  <div>
-    <section className="hero">
-      <h2>Find Your Perfect Volunteer Opportunity</h2>
-      <p>Connect with organizations looking for your skills and passions.</p>
-    </section>
+import { useEffect, useState } from 'react';
+import './Home.css';
 
-    <section className="features">
-      <div className="feature">
-        <h3>Discover Opportunities</h3>
-        <p>Browse through a variety of volunteer positions that match your interests.</p>
-      </div>
-      <div className="feature">
-        <h3>AI Recommendations</h3>
-        <p>Get personalized recommendations based on your profile and preferences.</p>
-      </div>
-    </section>
-  </div>
+const nearbyOpportunities = [
+  {
+    id: 1,
+    title: 'Planting trees, XYZ',
+    summary: 'Community park clean-up and planting.',
+    date: '17 Oct 2025',
+  },
+  {
+    id: 2,
+    title: 'Give clean water',
+    summary: 'Help assemble filter kits for families.',
+    date: '21 Oct 2025',
+  },
+];
+
+const recentOpportunities = [
+  {
+    id: 3,
+    title: 'Collaborate in an orphanage',
+    summary: 'Weekend creative workshops for kids.',
+    date: '13 Oct 2025',
+  },
+  {
+    id: 4,
+    title: 'Help new arrivals',
+    summary: 'Welcome packs for refugee families.',
+    date: '15 Oct 2025',
+  },
+];
+
+const OpportunityCard = ({ title, summary, date, isFavorite, onToggleFavorite }) => (
+  <article className="home-card">
+    <div className="home-card__icon" aria-hidden="true">
+      <span />
+    </div>
+    <div>
+      <h3>{title}</h3>
+      <p>{summary}</p>
+      <p className="home-card__date">{date}</p>
+    </div>
+    <button
+      className={`home-card__favorite${isFavorite ? ' active' : ''}`}
+      type="button"
+      aria-label="Save opportunity"
+      aria-pressed={isFavorite}
+      onClick={onToggleFavorite}
+    >
+      ♥
+    </button>
+  </article>
 );
+
+const FAVORITES_STORAGE_KEY = 'homeFavoriteOpportunityIds';
+
+const Home = () => {
+  const [favoriteIds, setFavoriteIds] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = window.sessionStorage.getItem(FAVORITES_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Failed to read favorites from sessionStorage', error);
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
+  }, [favoriteIds]);
+
+  const handleToggleFavorite = (id) => {
+    setFavoriteIds((current) =>
+      current.includes(id) ? current.filter((itemId) => itemId !== id) : [...current, id],
+    );
+  };
+
+  return (
+    <div className="home-shell">
+      <div className="home-grid">
+        <section className="home-section">
+          <header>
+            <h2>Volunteering opportunities nearby</h2>
+            <button type="button" className="link-button">
+              See all
+            </button>
+          </header>
+          <div className="home-list">
+            {nearbyOpportunities.map((item) => (
+              <OpportunityCard
+                key={item.id}
+                {...item}
+                isFavorite={favoriteIds.includes(item.id)}
+                onToggleFavorite={() => handleToggleFavorite(item.id)}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="home-section">
+          <header>
+            <h2>Recent opportunities</h2>
+            <button type="button" className="link-button">
+              See all
+            </button>
+          </header>
+          <div className="home-list">
+            {recentOpportunities.map((item) => (
+              <OpportunityCard
+                key={item.id}
+                {...item}
+                isFavorite={favoriteIds.includes(item.id)}
+                onToggleFavorite={() => handleToggleFavorite(item.id)}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
 
 export default Home;
