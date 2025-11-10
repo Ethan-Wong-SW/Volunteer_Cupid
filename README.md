@@ -15,21 +15,26 @@ python -m venv .venv
    
 Windows:
 ```
-.venv\Scripts\activate\
+.venv\Scripts\activate
 ```
 Mac/Linux:
 ```
 source .venv/bin/activate
 ```
 4.Install the required packages using the requirements.txt file:
+
 ```
 pip install -r requirements.txt
 ```
 
-5.Run the server\
+5.Run the server
+
 ```
 uvicorn api_main:app --reload
 ```
+If u see\
+INFO: Application startup complete.\
+You are good to go to the next step\
 
 # Start the frontend on the second terminal
 
