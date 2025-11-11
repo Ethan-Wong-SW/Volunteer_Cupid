@@ -139,7 +139,15 @@ function Header({ onSignOut }) {
 
   return (
     <header>
-      <h1>Volunteer Cupid</h1>
+      <h1>
+        <NavLink 
+          to="/home" 
+          className="logo-link"
+          end
+        >
+          Volunteer Cupid
+        </NavLink>
+      </h1>
       <div className="header-profile" ref={menuRef}>
         <button
           type="button"

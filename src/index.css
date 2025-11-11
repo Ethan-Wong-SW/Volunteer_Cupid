@@ -259,3 +259,8 @@ input[type='text'] {
     gap: 1rem;
   }
 }
+
+.logo-link.active {
+  text-decoration: none;
+  color: inherit;
+}
