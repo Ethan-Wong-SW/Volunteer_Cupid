@@ -1,15 +1,22 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import './Opportunities.css';
 import { allOpportunities } from '../data/opportunities';
-import QuizModal from '../components/QuizModal'; // <-- NEW: Import the modal
+import QuizModal from '../components/QuizModal';
+import cardArtwork from '../assets/43180.jpg';
 
-const Opportunities = ({ profile = {}, onApply, defaultProfile, onQuizComplete }) => {
-  const profileName = profile.name || defaultProfile?.name || 'Volunteer';
+const formatStartDate = (value) => {
+  if (!value) return 'Flexible start';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+  return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+};
 
+const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [skillFilter, setSkillFilter] = useState('all');
-  //Add state to control the modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -31,7 +38,10 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile, onQuizComplete }
     );
   }, []);
 
-  const locations = useMemo(() => Array.from(new Set(allOpportunities.map((item) => item.location))), []);
+  const locations = useMemo(
+    () => Array.from(new Set(allOpportunities.map((item) => item.location))).sort(),
+    [],
+  );
 
   const skills = useMemo(
     () =>
@@ -39,57 +49,77 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile, onQuizComplete }
         new Set(
           allOpportunities
             .flatMap((item) => item.skills || [])
-            .map((skill) => skill.toLowerCase())
-        )
+            .map((skill) => skill.toLowerCase()),
+        ),
       ).sort(),
-    []
+    [],
   );
-  // --- NEW (Optional Bonus): This syncs the dropdown with your profile ---
-  // When your profile changes, this will try to auto-select a skill in the filter
+
   useEffect(() => {
-    const profileSkills = profile.skills || [];
-    if (profileSkills.length > 0) {
-      // Find the first profile skill that is also in the dropdown list
-      const topSkill = profileSkills.find(ps => skills.includes(ps.toLowerCase()));
-      if (topSkill) {
-        setSkillFilter(topSkill.toLowerCase());
-      }
+    const profileSkills = (profile.skills || []).map((skill) => skill.toLowerCase());
+    if (!profileSkills.length) return;
+    const matchedSkill = profileSkills.find((skill) => skills.includes(skill));
+    if (matchedSkill) {
+      setSkillFilter(matchedSkill);
     }
-  }, [profile.skills, skills]); // Re-run if profile.skills changes
-  
-  // --- UPDATED: The filter logic with AI matching ---
+  }, [profile.skills, skills]);
+
   const filteredOpportunities = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
+    const normalizedUserInterests = (profile.interests || []).map((interest) => interest.toLowerCase());
+    const userInterestSet = new Set(normalizedUserInterests);
 
-    // --- NEW: Get the user's interests from the profile ---
-    const userInterests = profile.interests || [];
+    const scored = allOpportunities
+      .map((opportunity, index) => ({ opportunity, index }))
+      .filter(({ opportunity }) => {
+        const matchesSearch =
+          !normalizedSearch ||
+          opportunity.title.toLowerCase().includes(normalizedSearch) ||
+          opportunity.description.toLowerCase().includes(normalizedSearch) ||
+          opportunity.skills.some((skill) => skill.toLowerCase().includes(normalizedSearch));
 
-    return allOpportunities.filter((opportunity) => {
-      // Your existing filter logic
-      const matchesSearch =
-        !normalizedSearch ||
-        opportunity.title.toLowerCase().includes(normalizedSearch) ||
-        opportunity.description.toLowerCase().includes(normalizedSearch) ||
-        opportunity.skills.some((skill) => skill.toLowerCase().includes(normalizedSearch));
+        if (!matchesSearch) return false;
 
-      const matchesLocation = locationFilter === 'all' || opportunity.location === locationFilter;
-      const matchesSkill =
-        skillFilter === 'all' || opportunity.skills.some((skill) => skill.toLowerCase() === skillFilter);
-      
-      // --- NEW: The AI Matching Logic ---
-      // This checks for an overlap between the user's interests and the opportunity's interests
-      const matchesAiInterests =
-        userInterests.length === 0 || // If user has no interests, show all
-        opportunity.interests.some(interest => // <-- THE KEY CHANGE
-          userInterests.includes(interest.toLowerCase())
+        const matchesLocation = locationFilter === 'all' || opportunity.location === locationFilter;
+        const matchesSkill =
+          skillFilter === 'all' || opportunity.skills.some((skill) => skill.toLowerCase() === skillFilter);
+
+        return matchesLocation && matchesSkill;
+      })
+      .map(({ opportunity, index }) => {
+        const opportunityInterests = (opportunity.interests || []).map((interest) => interest.toLowerCase());
+        const overlap = opportunityInterests.filter((interest) => userInterestSet.has(interest));
+        const hasAll = normalizedUserInterests.length > 0 && normalizedUserInterests.every((interest) =>
+          opportunityInterests.includes(interest),
         );
+        const category = normalizedUserInterests.length === 0
+          ? 1 // keep middle bucket when user has no interests
+          : hasAll
+            ? 0
+            : overlap.length > 0
+              ? 1
+              : 2;
 
-      // --- UPDATED: All filters must now be true ---
-      return matchesAiInterests && matchesSearch && matchesLocation && matchesSkill;
+        return {
+          opportunity,
+          index,
+          category,
+          overlapCount: overlap.length,
+        };
+      });
+
+    scored.sort((a, b) => {
+      if (a.category !== b.category) {
+        return a.category - b.category;
+      }
+      if (b.overlapCount !== a.overlapCount) {
+        return b.overlapCount - a.overlapCount;
+      }
+      return a.index - b.index; // keep original ordering inside identical groups
     });
 
-    // --- UPDATED: Add profile.interests to the dependency array ---
-  }, [locationFilter, skillFilter, searchTerm, profile.interests]);
+    return scored.map(({ opportunity }) => opportunity);
+  }, [searchTerm, locationFilter, skillFilter, profile.interests]);
 
   return (
     <section className="opportunities-shell">
@@ -119,7 +149,6 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile, onQuizComplete }
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </label>
-
         <label className="filter-field">
           <span>Location</span>
           <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
@@ -131,7 +160,6 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile, onQuizComplete }
             ))}
           </select>
         </label>
-
         <label className="filter-field">
           <span>Skills</span>
           <select value={skillFilter} onChange={(event) => setSkillFilter(event.target.value)}>
@@ -168,34 +196,50 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile, onQuizComplete }
     </section>
   );
 };
-const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite }) => (
-  <article className="opportunity-card">
-    <div className="opportunity-card__icon" aria-hidden="true">
-      <span />
-    </div>
-    <div className="opportunity-card__body">
-      <div className="opportunity-card__header">
-        <h3>{opportunity.title}</h3>
-        <p className="opportunity-card__location">{opportunity.location}</p>
-      </div>
-      <p className="opportunity-card__description">{opportunity.description}</p>
-      <div className="opportunity-card__skills">
-        {opportunity.skills.map((skill) => (
-          <span key={skill}>{skill}</span>
-        ))}
-      </div>
-    </div>
+const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite }) => {
+  const organizer = opportunity.organizer || 'Community Partner';
+  const dateLabel = formatStartDate(opportunity.startDate || opportunity.date);
+  const resolvedSpots = opportunity.spotsLeft;
+  const spotsLeft =
+    typeof resolvedSpots === 'number'
+      ? `${resolvedSpots} spots left`
+      : resolvedSpots || `${Math.max(2, 8 - (opportunity.id % 4))} spots left`;
 
-    <button
-      className={`home-card__favorite${isFavorite ? ' active' : ''}`}
-      type="button"
-      aria-label="Save opportunity"
-      aria-pressed={isFavorite}
-      onClick={() => onToggleFavorite(opportunity.id)}
-    >
-      ♥
-    </button>
-  </article>
-);
+  return (
+    <article className="opportunity-card">
+      <div className="opportunity-card__media">
+        <img src={cardArtwork} alt="" aria-hidden="true" />
+        <span className="opportunity-card__badge">{spotsLeft}</span>
+        <button
+          className={`home-card__favorite${isFavorite ? ' active' : ''}`}
+          type="button"
+          aria-label={isFavorite ? 'Remove from saved opportunities' : 'Save opportunity'}
+          aria-pressed={isFavorite}
+          onClick={() => onToggleFavorite(opportunity.id)}
+        >
+          ♥
+        </button>
+      </div>
+      <div className="opportunity-card__content">
+        <h3>{opportunity.title}</h3>
+        <p className="opportunity-card__org">{organizer}</p>
+        <div className="opportunity-card__meta">
+          <span className="opportunity-card__meta-item">
+            <span aria-hidden="true">📍</span> {opportunity.location || 'Remote / Hybrid'}
+          </span>
+          <span className="opportunity-card__meta-item">
+            <span aria-hidden="true">📅</span> {dateLabel}
+          </span>
+        </div>
+        <p className="opportunity-card__description">{opportunity.description}</p>
+        <div className="opportunity-card__skills">
+          {opportunity.skills.map((skill) => (
+            <span key={skill}>{skill}</span>
+          ))}
+        </div>
+      </div>
+    </article>
+  );
+};
 
 export default Opportunities;

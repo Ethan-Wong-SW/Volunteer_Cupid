@@ -1,4 +1,4 @@
-export const allOpportunities = [
+const seedOpportunities = [
   {
     id: 1,
     title: 'Community Garden Helper',
@@ -52,42 +52,42 @@ export const allOpportunities = [
     location: 'Sunrise Retirement Home',
     interests: ["Eldercare", "Social Services"],
   },
-//   {
-//     id: 7,
-//     title: 'Beach Cleanup Volunteer',
-//     description:
-//       'Join a local cleanup initiative to remove litter and protect marine life.',
-//     skills: ['teamwork', 'environmental awareness'],
-//     location: 'Seaside Park',
-//     interests: ['environment', 'ocean'],
-//   },
-//   {
-//     id: 8,
-//     title: 'Tech Support for Nonprofits',
-//     description:
-//       'Assist nonprofit organizations with basic IT troubleshooting and website maintenance.',
-//     skills: ['IT', 'problem solving'],
-//     location: 'Remote or On-site',
-//     interests: ['technology', 'community'],
-//   },
-//   {
-//     id: 9,
-//     title: 'Hospital Volunteer',
-//     description:
-//       'Support hospital staff by helping with reception, patient guidance, or deliveries.',
-//     skills: ['communication', 'organization'],
-//     location: 'City Hospital',
-//     interests: ['healthcare', 'helping others'],
-//   },
-//   {
-//     id: 10,
-//     title: 'Art Workshop Assistant',
-//     description:
-//       'Assist in organizing art classes for children and adults. Help with materials and setup.',
-//     skills: ['creativity', 'organization'],
-//     location: 'Art Center',
-//     interests: ['art', 'education'],
-//   },
+  {
+    id: 7,
+    title: 'Beach Cleanup Volunteer',
+    description:
+      'Join a local cleanup initiative to remove litter and protect marine life.',
+    skills: ['teamwork', 'environmental awareness'],
+    location: 'Seaside Park',
+    interests: ['environment', 'ocean'],
+  },
+  {
+    id: 8,
+    title: 'Tech Support for Nonprofits',
+    description:
+      'Assist nonprofit organizations with basic IT troubleshooting and website maintenance.',
+    skills: ['IT', 'problem solving'],
+    location: 'Remote or On-site',
+    interests: ['technology', 'community'],
+  },
+  {
+    id: 9,
+    title: 'Hospital Volunteer',
+    description:
+      'Support hospital staff by helping with reception, patient guidance, or deliveries.',
+    skills: ['communication', 'organization'],
+    location: 'City Hospital',
+    interests: ['healthcare', 'helping others'],
+  },
+  {
+    id: 10,
+    title: 'Art Workshop Assistant',
+    description:
+      'Assist in organizing art classes for children and adults. Help with materials and setup.',
+    skills: ['creativity', 'organization'],
+    location: 'Art Center',
+    interests: ['art', 'education'],
+  },
 //   {
 //     id: 11,
 //     title: 'Sports Coach Assistant',
@@ -211,6 +211,30 @@ export const allOpportunities = [
 //     interests: ['fundraising', 'social impact'],
 //   },
 ];
+
+const communityPartners = [
+  'Hope Horizon Coalition',
+  'Riverstone Community Alliance',
+  'BrightSteps Foundation',
+  'Harvest Hands Collective',
+  'Neighborly Hearts Network',
+  'Sunrise Outreach Partners',
+];
+
+const getRandomPartner = () => communityPartners[Math.floor(Math.random() * communityPartners.length)];
+
+const getRandomStartDate = () => {
+  const start = new Date();
+  const offsetDays = Math.floor(Math.random() * 150) + 10; // between ~1.5 and 5 months out
+  start.setDate(start.getDate() + offsetDays);
+  return start.toISOString().split('T')[0]; // YYYY-MM-DD
+};
+
+export const allOpportunities = seedOpportunities.map((opportunity) => ({
+  ...opportunity,
+  organizer: opportunity.organizer || getRandomPartner(),
+  startDate: opportunity.startDate || getRandomStartDate(),
+}));
 
 export const opportunitiesList = allOpportunities
   .map((opportunity, index) => `${index + 1}. ${opportunity.title} - ${opportunity.location}`)
