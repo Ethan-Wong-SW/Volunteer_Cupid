@@ -56,25 +56,55 @@ header h1 {
 }
 
 .header-avatar-button {
-  border: 1px solid #dfe6dd;
-  background: #ffffff;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  border: none;
+  background: transparent;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  position: relative;
+  z-index: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
+  padding: 0.25rem;
+  outline: none;
 }
 
+.header-avatar-button:hover,
 .header-avatar-button:focus-visible {
-  outline: 2px solid #4caf50;
-  outline-offset: 3px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.header-avatar-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e8f8ec;
+  border: 1px solid #c6e6cc;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.85);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.header-avatar-button:hover::after,
+.header-avatar-button:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .header-avatar {
   font-size: 1.4rem;
+  color: #000000;
 }
 
 .header-menu {

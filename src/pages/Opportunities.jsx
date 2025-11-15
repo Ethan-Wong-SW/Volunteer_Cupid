@@ -44,17 +44,21 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
     [],
   );
 
-  const skills = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          allOpportunities
-            .flatMap((item) => item.skills || [])
-            .map((skill) => skill.toLowerCase()),
-        ),
-      ).sort(),
-    [],
-  );
+  const { skills, skillLabelMap } = useMemo(() => {
+    const labelMap = new Map();
+
+    allOpportunities
+      .flatMap((item) => item.skills || [])
+      .forEach((skill) => {
+        const normalized = skill.toLowerCase();
+        if (!labelMap.has(normalized)) {
+          labelMap.set(normalized, skill);
+        }
+      });
+
+    const uniqueSkills = Array.from(labelMap.keys()).sort();
+    return { skills: uniqueSkills, skillLabelMap: labelMap };
+  }, []);
 
   useEffect(() => {
     const profileSkills = (profile.skills || []).map((skill) => skill.toLowerCase());
@@ -165,11 +169,14 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
           <span>Skills</span>
           <select value={skillFilter} onChange={(event) => setSkillFilter(event.target.value)}>
             <option value="all">All skills</option>
-            {skills.map((skill) => (
-              <option key={skill} value={skill}>
-                {skill.replace(/(^\w|\s\w)/g, (s) => s.toUpperCase())}
-              </option>
-            ))}
+            {skills.map((skill) => {
+              const label = skillLabelMap.get(skill) ?? skill.replace(/(^\w|\s\w)/g, (s) => s.toUpperCase());
+              return (
+                <option key={skill} value={skill}>
+                  {label}
+                </option>
+              );
+            })}
           </select>
         </label>
       </div>

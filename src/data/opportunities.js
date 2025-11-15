@@ -39,7 +39,7 @@ const seedOpportunities = [
     id: 5,
     title: 'Food Bank Assistant',
     description: 'Sort and distribute food donations to families in need.',
-    skills: ["Teamwork", "Organizing","Crowd Management"],
+    skills: ["Teamwork", "Organising","Crowd Management"],
     location: 'Downtown Food Bank',
     interests: ["Social Services", "Event Support"],
   },
@@ -57,36 +57,36 @@ const seedOpportunities = [
     title: 'Beach Cleanup Volunteer',
     description:
       'Join a local cleanup initiative to remove litter and protect marine life.',
-    skills: ['teamwork', 'environmental awareness'],
+    skills: ['Teamwork', 'Environmental Awareness'],
     location: 'Seaside Park',
-    interests: ['environment', 'ocean'],
+    interests: ['Environment', 'Ocean'],
   },
   {
     id: 8,
     title: 'Tech Support for Nonprofits',
     description:
       'Assist nonprofit organizations with basic IT troubleshooting and website maintenance.',
-    skills: ['IT', 'problem solving'],
+    skills: ['IT', 'Problem Solving'],
     location: 'Remote or On-site',
-    interests: ['technology', 'community'],
+    interests: ['Technology', 'Community'],
   },
   {
     id: 9,
     title: 'Hospital Volunteer',
     description:
       'Support hospital staff by helping with reception, patient guidance, or deliveries.',
-    skills: ['communication', 'organization'],
+    skills: ['Communication', 'Organization'],
     location: 'City Hospital',
-    interests: ['healthcare', 'helping others'],
+    interests: ['Healthcare', 'Helping Others'],
   },
   {
     id: 10,
     title: 'Art Workshop Assistant',
     description:
       'Assist in organizing art classes for children and adults. Help with materials and setup.',
-    skills: ['creativity', 'organization'],
+    skills: ['Creativity', 'Organisation'],
     location: 'Art Center',
-    interests: ['art', 'education'],
+    interests: ['Art', 'Education'],
   },
 //   {
 //     id: 11,

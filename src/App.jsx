@@ -207,7 +207,7 @@ function Header({ onSignOut }) {
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span className="header-avatar" aria-hidden="true">
-            👤
+            ☰
           </span>
           <span className="sr-only">Open navigation menu</span>
         </button>
