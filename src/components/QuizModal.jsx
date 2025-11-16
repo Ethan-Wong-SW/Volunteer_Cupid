@@ -20,8 +20,8 @@ export default function QuizModal({ show, onClose, onComplete }) {
   const handleSubmit = async () => {
     const trimmedInterests = interests.trim();
     const trimmedSkills = skills.trim();
-    if (!trimmedInterests && !trimmedSkills) {
-      setApiError('Please fill in the blank field before finding matches.');
+    if (!trimmedInterests) {
+      setApiError('Please fill in the interests field before finding matches.');
       setApiResponse(null);
       return;
     }
