@@ -12,6 +12,7 @@ const DEFAULT_PROFILE = {
   email: 'ben@mail.com',
   password: 'test1234',
   interests: [],
+  skills: [],
   appliedOpportunities: [],
 };
 
@@ -27,6 +28,7 @@ const readProfileFromStorage = () => {
       ...DEFAULT_PROFILE,
       ...parsed,
       interests: Array.isArray(parsed?.interests) ? parsed.interests : DEFAULT_PROFILE.interests,
+      skills: Array.isArray(parsed?.skills) ? parsed.skills : DEFAULT_PROFILE.skills,
       appliedOpportunities: Array.isArray(parsed?.appliedOpportunities)
         ? parsed.appliedOpportunities
         : DEFAULT_PROFILE.appliedOpportunities,
@@ -99,6 +101,22 @@ function App() {
     },
     [],
   );
+  const handleProfileTagsChange = useCallback((nextTags = {}) => {
+    setProfile((currentProfile) => {
+      const mergedInterests = Array.isArray(nextTags?.interests)
+        ? [...new Set(nextTags.interests)]
+        : currentProfile.interests || DEFAULT_PROFILE.interests;
+      const mergedSkills = Array.isArray(nextTags?.skills)
+        ? [...new Set(nextTags.skills)]
+        : currentProfile.skills || DEFAULT_PROFILE.skills;
+
+      return {
+        ...currentProfile,
+        interests: mergedInterests,
+        skills: mergedSkills,
+      };
+    });
+  }, []);
   const handleQuizComplete = useCallback(
     (newTags) => {
       setProfile((currentProfile) => {
@@ -167,7 +185,14 @@ function App() {
         />
         <Route
           path="/profile"
-          element={<ProfilePage profile={profile} onSave={handleProfileSave} defaultProfile={DEFAULT_PROFILE} />}
+          element={
+            <ProfilePage
+              profile={profile}
+              onSave={handleProfileSave}
+              onTagsChange={handleProfileTagsChange}
+              defaultProfile={DEFAULT_PROFILE}
+            />
+          }
         />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />

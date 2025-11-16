@@ -37,7 +37,7 @@ const Tag = ({ label, onRemove }) => (
   </button>
 );
 
-const Profile = ({ profile, onSave, defaultProfile }) => {
+const Profile = ({ profile, onSave, defaultProfile, onTagsChange }) => {
   const fallbackProfile = defaultProfile ?? {
     name: 'Ben',
     email: 'ben@mail.com',
@@ -205,24 +205,52 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     return cells;
   }, [displayMonthDate, upcomingDateKey, eventsByDate]);
   // <-- NEW: Handlers to update local tag state
+  const notifyTagChange = (nextInterests, nextSkills) => {
+    // Keep the live profile in sync so opportunity filters update instantly.
+    if (typeof onTagsChange === 'function') {
+      onTagsChange({
+        interests: nextInterests,
+        skills: nextSkills,
+      });
+    }
+  };
+
   const handleRemoveInterest = (interestToRemove) => {
-    setInterests((current) => current.filter((interest) => interest !== interestToRemove));
+    const nextInterests = interests.filter((interest) => interest !== interestToRemove);
+    setInterests(nextInterests);
+    notifyTagChange(nextInterests, skills);
   };
 
   const handleRemoveSkill = (skillToRemove) => {
-    setSkills((current) => current.filter((skill) => skill !== skillToRemove));
+    const nextSkills = skills.filter((skill) => skill !== skillToRemove);
+    setSkills(nextSkills);
+    notifyTagChange(interests, nextSkills);
   };
 
-  const handleAddItem = (value, setValue, addToList) => {
-    const trimmed = value.trim();
+  const handleAddInterest = () => {
+    const trimmed = selectedInterest.trim();
     if (!trimmed) return;
-    addToList((current) => {
-      if (current.includes(trimmed)) {
-        return current;
-      }
-      return [...current, trimmed];
-    });
-    setValue('');
+    if (interests.includes(trimmed)) {
+      setSelectedInterest('');
+      return;
+    }
+    const nextInterests = [...interests, trimmed];
+    setInterests(nextInterests);
+    notifyTagChange(nextInterests, skills);
+    setSelectedInterest('');
+  };
+
+  const handleAddSkill = () => {
+    const trimmed = selectedSkill.trim();
+    if (!trimmed) return;
+    if (skills.includes(trimmed)) {
+      setSelectedSkill('');
+      return;
+    }
+    const nextSkills = [...skills, trimmed];
+    setSkills(nextSkills);
+    notifyTagChange(interests, nextSkills);
+    setSelectedSkill('');
   };
 
   const handleSubmit = (event) => {
@@ -426,12 +454,7 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
                   </option>
                 ))}
               </select>
-              <button
-                type="button"
-                className="tag-add-button"
-                onClick={() => handleAddItem(selectedInterest, setSelectedInterest, setInterests)}
-                disabled={!selectedInterest}
-              >
+              <button type="button" className="tag-add-button" onClick={handleAddInterest} disabled={!selectedInterest}>
                 Add
               </button>
             </div>
@@ -466,12 +489,7 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
                   </option>
                 ))}
               </select>
-              <button
-                type="button"
-                className="tag-add-button"
-                onClick={() => handleAddItem(selectedSkill, setSelectedSkill, setSkills)}
-                disabled={!selectedSkill}
-              >
+              <button type="button" className="tag-add-button" onClick={handleAddSkill} disabled={!selectedSkill}>
                 Add
               </button>
             </div>

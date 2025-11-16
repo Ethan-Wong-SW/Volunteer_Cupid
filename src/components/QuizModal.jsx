@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './QuizModal.css';
 
 export default function QuizModal({ show, onClose, onComplete }) {
@@ -8,11 +8,28 @@ export default function QuizModal({ show, onClose, onComplete }) {
   const [apiResponse, setApiResponse] = useState(null);
   const [apiError, setApiError] = useState(null);
 
+  useEffect(() => {
+    if (show) return;
+    setInterests('');
+    setSkills('');
+    setIsLoading(false);
+    setApiResponse(null);
+    setApiError(null);
+  }, [show]);
+
   const handleSubmit = async () => {
+    const trimmedInterests = interests.trim();
+    const trimmedSkills = skills.trim();
+    if (!trimmedInterests && !trimmedSkills) {
+      setApiError('Please fill in the blank field before finding matches.');
+      setApiResponse(null);
+      return;
+    }
+
     setIsLoading(true);
     setApiError(null);
     setApiResponse(null);
-    const combinedDescription = `Interests: ${interests} Skills: ${skills}`;
+    const combinedDescription = `Interests: ${trimmedInterests} Skills: ${trimmedSkills}`;
 
     try {
       const response = await fetch('/api/get-tags', {
@@ -51,7 +68,20 @@ export default function QuizModal({ show, onClose, onComplete }) {
 
   const renderContent = () => {
     if (isLoading) return <div className="modal-content"><p>Processing...</p></div>;
-    if (apiError) return <div className="modal-content"><p>Error: {apiError}</p></div>;
+    if (apiError) {
+      return (
+        <div className="modal-content">
+          <p>{apiError}</p>
+          <button
+            type="button"
+            className="modal-button modal-button__secondary"
+            onClick={() => setApiError(null)}
+          >
+            Back
+          </button>
+        </div>
+      );
+    }
 
     if (apiResponse) {
       // Feedback Screen
