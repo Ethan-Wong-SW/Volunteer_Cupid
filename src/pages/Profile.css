@@ -382,6 +382,46 @@
   gap: 8px;
 }
 
+.tag-input-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag-input-row input,
+.tag-input-row select {
+  flex: 1;
+  min-width: 180px;
+  border: 1px solid #d5e4d2;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.tag-add-button {
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  background: #4caf50;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tag-add-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(76, 175, 80, 0.25);
+}
+
+.tag-add-button:disabled {
+  background: #cbd7cb;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Individual tag (re-used from QuizModal) */
 .tag {
   display: inline-flex;

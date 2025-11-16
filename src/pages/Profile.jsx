@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import './Profile.css';
+import { allOpportunities } from '../data/opportunities';
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -16,7 +17,7 @@ const Tag = ({ label, onRemove }) => (
 const Profile = ({ profile, onSave, defaultProfile }) => {
   const fallbackProfile = defaultProfile ?? {
     name: 'Guest User',
-    interests: ['environment'],
+    interests: ['Environment'],
     email: 'volunteer@example.com',
   };
   const [name, setName] = useState(profile.name ?? '');
@@ -26,6 +27,34 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
   // <-- NEW: Add local state for interests and skills
   const [interests, setInterests] = useState(profile.interests ?? []);
   const [skills, setSkills] = useState(profile.skills ?? []);
+  const [selectedInterest, setSelectedInterest] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState('');
+
+  const { availableInterests, availableSkills } = useMemo(() => {
+    const interestMap = new Map();
+    const skillMap = new Map();
+
+    allOpportunities.forEach((item) => {
+      (item.interests || []).forEach((interest) => {
+        const normalized = interest.toLowerCase();
+        if (!interestMap.has(normalized)) {
+          interestMap.set(normalized, interest);
+        }
+      });
+      (item.skills || []).forEach((skill) => {
+        const normalized = skill.toLowerCase();
+        if (!skillMap.has(normalized)) {
+          skillMap.set(normalized, skill);
+        }
+      });
+    });
+
+    const localeSort = (a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' });
+    return {
+      availableInterests: Array.from(interestMap.values()).sort(localeSort),
+      availableSkills: Array.from(skillMap.values()).sort(localeSort),
+    };
+  }, []);
 
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
@@ -38,6 +67,8 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     // <-- NEW: Update tag state when profile prop changes
     setInterests(profile.interests ?? []);
     setSkills(profile.skills ?? []);
+    setSelectedInterest('');
+    setSelectedSkill('');
   }, [profile]);
 
   const upcomingDate =
@@ -105,6 +136,18 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     setSkills((current) => current.filter((skill) => skill !== skillToRemove));
   };
 
+  const handleAddItem = (value, setValue, addToList) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    addToList((current) => {
+      if (current.includes(trimmed)) {
+        return current;
+      }
+      return [...current, trimmed];
+    });
+    setValue('');
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -126,7 +169,7 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
       <header className="profile-hero">
         <p className="eyebrow">Profile</p>
         <h1>Keep your volunteering story up to date.</h1>
-        <p>Tell organizations who you are, what you care about, and when you are free to help.</p>
+        <p>Tell organisations who you are, what you care about, and when you are free to help.</p>
       </header>
 
       <div className="profile-grid">
@@ -277,8 +320,29 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
           <div className="tag-management-section">
             <span className="form-field-label">Your Interests</span>
             <p className="form-field-description">
-              Tags from the AI quiz appear here. Click a tag to remove it.
+              Tags from the AI quiz appear here. Click a tag to remove it, or pick more causes below.
             </p>
+            <div className="tag-input-row">
+              <select
+                value={selectedInterest}
+                onChange={(event) => setSelectedInterest(event.target.value)}
+              >
+                <option value="">Select an interest</option>
+                {availableInterests.map((interest) => (
+                  <option key={interest} value={interest}>
+                    {interest}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="tag-add-button"
+                onClick={() => handleAddItem(selectedInterest, setSelectedInterest, setInterests)}
+                disabled={!selectedInterest}
+              >
+                Add
+              </button>
+            </div>
             <div className="tag-container">
               {interests.length > 0 ? (
                 interests.map((interest) => (
@@ -297,7 +361,28 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
           {/* --- NEW: Add the Skill Management Section --- */}
           <div className="tag-management-section">
             <span className="form-field-label">Your Skills</span>
-            <p className="form-field-description">Click a tag to remove it.</p>
+            <p className="form-field-description">Click a tag to remove it, or choose more skills below.</p>
+            <div className="tag-input-row">
+              <select
+                value={selectedSkill}
+                onChange={(event) => setSelectedSkill(event.target.value)}
+              >
+                <option value="">Select a skill</option>
+                {availableSkills.map((skill) => (
+                  <option key={skill} value={skill}>
+                    {skill}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="tag-add-button"
+                onClick={() => handleAddItem(selectedSkill, setSelectedSkill, setSkills)}
+                disabled={!selectedSkill}
+              >
+                Add
+              </button>
+            </div>
             <div className="tag-container">
               {skills.length > 0 ? (
                 skills.map((skill) => (
