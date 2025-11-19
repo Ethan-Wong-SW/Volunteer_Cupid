@@ -4,7 +4,7 @@ from transformers import pipeline
 from sentence_transformers import SentenceTransformer, util
 
 class VolunteerTagger:
-    def __init__(self, mode="zero-shot", top_n=4):
+    def __init__(self, mode="zero-shot", top_n=2):
         """
         mode: "zero-shot" or "embeddings"
         top_n: number of top tags per category to return
@@ -36,7 +36,7 @@ class VolunteerTagger:
                 "Social Services",
                 "Special Needs", 
                 "Sports", 
-                "Youth"
+                "Youth",
             ],
             "skills": [
                 "Communication",
@@ -45,7 +45,10 @@ class VolunteerTagger:
                 "Leadership",
                 "Crowd Management",
                 "Creativity",
-                "Organizing"
+                "Organizing",
+                "Outdoor work",
+                "Mentoring",
+                "Pet Care"
             ]
         }
 
