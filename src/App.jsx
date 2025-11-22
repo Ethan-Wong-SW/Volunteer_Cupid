@@ -6,6 +6,8 @@ import OpportunitiesPage from './pages/Opportunities';
 import OpportunityDetailPage from './pages/id/OpportunityDetail';
 import OpportunityReviewsPage from './pages/id/OpportunityReviews';
 import ProfilePage from './pages/Profile';
+import FavouritesDetailPage from './pages/favorites/FavouritesDetail';
+import FavouriteReviewsPage from './pages/favorites/FavouriteReviews';
 
 const DEFAULT_PROFILE = {
   name: 'Ben',
@@ -182,6 +184,14 @@ function App() {
         <Route
           path="/favorites"
           element={<HomePage />}
+        />
+        <Route
+          path="/favorites/:id"
+          element={<FavouritesDetailPage onApply={handleApply} />}
+        />
+        <Route
+          path="/favorites/:id/reviews"
+          element={<FavouriteReviewsPage />}
         />
         <Route
           path="/profile"

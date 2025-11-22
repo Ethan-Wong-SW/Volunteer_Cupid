@@ -53,11 +53,11 @@ const FavoriteCard = ({ opportunity, onToggleFavorite }) => {
       className="opportunity-card home-favorite-card opportunity-card--clickable"
       role="button"
       tabIndex={0}
-      onClick={() => navigate(`/opportunities/${opportunity.id}`)}
+      onClick={() => navigate(`/favorites/${opportunity.id}`)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          navigate(`/opportunities/${opportunity.id}`);
+          navigate(`/favorites/${opportunity.id}`);
         }
       }}
     >
