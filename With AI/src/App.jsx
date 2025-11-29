@@ -5,7 +5,6 @@ import Login from './pages/Login';
 import OpportunitiesPage from './pages/Opportunities';
 import OpportunityDetailPage from './pages/id/OpportunityDetail';
 import OpportunityReviewsPage from './pages/id/OpportunityReviews';
-import ProfilePage from './pages/Profile';
 import FavouritesDetailPage from './pages/favorites/FavouritesDetail';
 import FavouriteReviewsPage from './pages/favorites/FavouriteReviews';
 
@@ -96,29 +95,6 @@ function App() {
     [profile.name],
   );
 
-  const handleProfileSave = useCallback(
-    (nextProfile) => {
-      setProfile(nextProfile);
-      window.alert('Profile saved!');
-    },
-    [],
-  );
-  const handleProfileTagsChange = useCallback((nextTags = {}) => {
-    setProfile((currentProfile) => {
-      const mergedInterests = Array.isArray(nextTags?.interests)
-        ? [...new Set(nextTags.interests)]
-        : currentProfile.interests || DEFAULT_PROFILE.interests;
-      const mergedSkills = Array.isArray(nextTags?.skills)
-        ? [...new Set(nextTags.skills)]
-        : currentProfile.skills || DEFAULT_PROFILE.skills;
-
-      return {
-        ...currentProfile,
-        interests: mergedInterests,
-        skills: mergedSkills,
-      };
-    });
-  }, []);
   const handleQuizComplete = useCallback(
     (newTags) => {
       setProfile((currentProfile) => {
@@ -137,6 +113,15 @@ function App() {
     },
     [] // No dependencies, it uses the setProfile updater function
   );
+
+  const handleClearProfile = useCallback(() => {
+    setProfile((currentProfile) => ({
+      ...currentProfile,
+      interests: [],
+      skills: [],
+    }));
+    window.alert('Profile skills and interests cleared!');
+  }, []);
 
   const handleSignOut = useCallback(() => {
     setIsAuthenticated(false);
@@ -159,6 +144,7 @@ function App() {
               onApply={handleApply}
               defaultProfile={DEFAULT_PROFILE}
               onQuizComplete={handleQuizComplete} // <-- Pass the new handler
+              onClearProfile={handleClearProfile}
             />
           }
         />
@@ -170,6 +156,7 @@ function App() {
               onApply={handleApply}
               defaultProfile={DEFAULT_PROFILE}
               onQuizComplete={handleQuizComplete}
+              onClearProfile={handleClearProfile}
             />
           }
         />
@@ -192,17 +179,6 @@ function App() {
         <Route
           path="/favorites/:id/reviews"
           element={<FavouriteReviewsPage />}
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProfilePage
-              profile={profile}
-              onSave={handleProfileSave}
-              onTagsChange={handleProfileTagsChange}
-              defaultProfile={DEFAULT_PROFILE}
-            />
-          }
         />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
@@ -230,7 +206,6 @@ function ProtectedLayout({ isAuthenticated, onSignOut }) {
 const navItems = [
   { key: 'discover', label: 'Discover', path: '/opportunities' },
   { key: 'favorites', label: 'Favourites', path: '/favorites' },
-  { key: 'profile', label: 'Profile', path: '/profile' },
 ];
 
 function Header({ onSignOut }) {

@@ -19,7 +19,7 @@ const normalizeFavoriteId = (value) => {
   return Number.isNaN(asNumber) ? value : asNumber;
 };
 
-const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
+const Opportunities = ({ profile = {}, onApply, onQuizComplete, onClearProfile }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
@@ -105,25 +105,13 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
     return { skills: uniqueSkills, skillLabelMap: labelMap, uniqueInterests: sortedInterests };
   }, []);
 
-  // Logic to auto-select skill filter based on profile (optional)
-  useEffect(() => {
-    const profileSkills = (profile.skills || []).map((skill) => skill.toLowerCase());
-    if (!profileSkills.length) return;
-    // Only auto-set if filter is currently 'all' to avoid overriding user choice
-    if (skillFilter === 'all') { 
-        const matchedSkill = profileSkills.find((skill) => skills.includes(skill));
-        if (matchedSkill) {
-        setSkillFilter(matchedSkill);
-        }
-    }
-  }, [profile.skills, skills, skillFilter]);
-
 const filteredOpportunities = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const normalizedUserInterests = (profile.interests || []).map((interest) => interest.toLowerCase());
     const normalizedUserSkills = (profile.skills || []).map((s) => s.toLowerCase());
     
     const userInterestSet = new Set(normalizedUserInterests);
+    const userSkillSet = new Set(normalizedUserSkills);
 
     const scored = allOpportunities
       .map((opportunity, index) => ({ opportunity, index }))
@@ -144,11 +132,11 @@ const filteredOpportunities = useMemo(() => {
         const matchesSkill =
           skillFilter === 'all' || opportunity.skills.some((skill) => skill.toLowerCase() === skillFilter);
 
-        // 4. <-- NEW: Interest Filter (Dropdown)
+        // 4. Interest Filter (Dropdown)
         const matchesInterestFilter = 
           interestFilter === 'all' || opportunity.interests.some(i => i.toLowerCase() === interestFilter.toLowerCase());
 
-        // 5. <-- NEW: Date Filter
+        // 5. Date Filter
         // Logic: Show opportunities starting ON or AFTER the selected date
         let matchesDate = true;
         const oppDateString = opportunity.date || opportunity.startDate;
@@ -178,52 +166,28 @@ const filteredOpportunities = useMemo(() => {
             }
         }
 
-        // 6. AI Profile Matching (OR Logic)
-        let matchesProfile = true;
-        // Only apply if user has profile tags AND hasn't manually overridden with dropdowns
-        // (Adjust this logic if you want profile matching to always apply)
-        const hasManualFilters = skillFilter !== 'all' || interestFilter !== 'all' || dateRange !== '' || locationFilter !== 'all' || searchTerm !== '';
-        
-        if (!hasManualFilters && (normalizedUserInterests.length > 0 || normalizedUserSkills.length > 0)) {
-             const hasInterestMatch = opportunity.interests?.some(i => normalizedUserInterests.includes(i.toLowerCase()));
-             const hasSkillMatch = opportunity.skills?.some(s => normalizedUserSkills.includes(s.toLowerCase()));
-             matchesProfile = hasInterestMatch || hasSkillMatch;
-        } else if (!hasManualFilters && normalizedUserInterests.length === 0 && normalizedUserSkills.length === 0) {
-            // If no profile and no manual filters, show all
-            matchesProfile = true;
-        }
-
-        return matchesLocation && matchesSkill && matchesInterestFilter && matchesDate && matchesProfile;
+        return matchesLocation && matchesSkill && matchesInterestFilter && matchesDate;
       })
       .map(({ opportunity, index }) => {
-        // Scoring logic for sorting (unchanged)
+        // Scoring logic for sorting
         const opportunityInterests = (opportunity.interests || []).map((interest) => interest.toLowerCase());
-        const overlap = opportunityInterests.filter((interest) => userInterestSet.has(interest));
-        const hasAll = normalizedUserInterests.length > 0 && normalizedUserInterests.every((interest) =>
-          opportunityInterests.includes(interest),
-        );
-        const category = normalizedUserInterests.length === 0
-          ? 1
-          : hasAll
-            ? 0
-            : overlap.length > 0
-              ? 1
-              : 2;
+        const interestOverlap = opportunityInterests.filter((interest) => userInterestSet.has(interest)).length;
+
+        const opportunitySkills = (opportunity.skills || []).map((skill) => skill.toLowerCase());
+        const skillOverlap = opportunitySkills.filter((skill) => userSkillSet.has(skill)).length;
+
+        const totalOverlap = interestOverlap + skillOverlap;
 
         return {
           opportunity,
           index,
-          category,
-          overlapCount: overlap.length,
+          totalOverlap,
         };
       });
 
     scored.sort((a, b) => {
-      if (a.category !== b.category) {
-        return a.category - b.category;
-      }
-      if (b.overlapCount !== a.overlapCount) {
-        return b.overlapCount - a.overlapCount;
+      if (b.totalOverlap !== a.totalOverlap) {
+        return b.totalOverlap - a.totalOverlap;
       }
       return a.index - b.index;
     });
@@ -327,6 +291,18 @@ const filteredOpportunities = useMemo(() => {
                 style={{ fontFamily: 'inherit' }} 
             />
           </label>
+
+          <div className="filter-field">
+            <span style={{ visibility: 'hidden' }}>Action</span>
+            <button 
+                type="button" 
+                className="filter-clear-btn"
+                onClick={onClearProfile}
+                title="Clear all skills and interests from your profile"
+            >
+                Clear Filters
+            </button>
+          </div>
         </div>
 
         <div className="opportunities-list">
