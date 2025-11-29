@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Opportunities.css';
 import { allOpportunities } from '../data/opportunities';
-import QuizModal from '../components/QuizModal';
 import cardArtwork from '../assets/43180.jpg';
 
 const formatStartDate = (value) => {
@@ -19,14 +18,13 @@ const normalizeFavoriteId = (value) => {
   return Number.isNaN(asNumber) ? value : asNumber;
 };
 
-const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
+const Opportunities = ({ profile = {}, onApply, onClearProfile }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [skillFilter, setSkillFilter] = useState('all');
   const [interestFilter, setInterestFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const snackbarTimerRef = useRef(null);
@@ -231,6 +229,15 @@ const filteredOpportunities = useMemo(() => {
     return scored.map(({ opportunity }) => opportunity);
   }, [searchTerm, locationFilter, skillFilter, interestFilter, dateRange, profile.interests, profile.skills]);
 
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setLocationFilter('all');
+    setSkillFilter('all');
+    setInterestFilter('all');
+    setDateRange({ start: '', end: '' });
+    if (onClearProfile) onClearProfile();
+  };
+
   return (
     <>
       <section className="opportunities-shell">
@@ -239,25 +246,6 @@ const filteredOpportunities = useMemo(() => {
           <h1>Find the next place to lend a hand.</h1>
           <p>Browse every opportunity currently accepting volunteers and apply when one speaks to you.</p>
         </header>
-        {/* --- NEW VISUAL CALLOUT SECTION --- */}
-        <div className="quiz-callout">
-          <div className="quiz-callout__content">
-            <div className="quiz-callout__icon">
-              ✨
-            </div>
-            <div className="quiz-callout__text">
-              <h3>Ready to find your perfect match?</h3>
-              <p>Take our 1-minute quiz to personalize your feed based on your unique skills and interests.</p>
-            </div>
-          </div>
-          <button 
-            type="button" 
-            className="quiz-callout__button" 
-            onClick={() => setIsModalOpen(true)}
-          >
-            Take the Quiz
-          </button>
-        </div>
         
         <div className="opportunities-filters" role="search">
           <label className="filter-field">
@@ -327,6 +315,18 @@ const filteredOpportunities = useMemo(() => {
                 style={{ fontFamily: 'inherit' }} 
             />
           </label>
+
+          <div className="filter-field">
+            <span style={{ visibility: 'hidden' }}>Action</span>
+            <button 
+                type="button" 
+                className="filter-clear-btn"
+                onClick={handleClearFilters}
+                title="Clear all filters and profile preferences"
+            >
+                Clear Filters
+            </button>
+          </div>
         </div>
 
         <div className="opportunities-list">
@@ -345,11 +345,6 @@ const filteredOpportunities = useMemo(() => {
             <p className="opportunities-empty">No opportunities match your filters right now.</p>
           )}
         </div>
-        <QuizModal 
-          show={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onComplete={onQuizComplete} // This passes the tags up to App.jsx
-        />
       </section>
       <div className={`snackbar${snackbarVisible ? ' visible' : ''}`} role="status" aria-live="polite">
         {snackbarMessage}

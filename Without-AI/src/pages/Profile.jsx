@@ -449,7 +449,7 @@ const Profile = ({ profile, onSave, defaultProfile, onTagsChange }) => {
           <div className="tag-management-section">
             <span className="form-field-label">Your Interests</span>
             <p className="form-field-description">
-              Tags from the AI quiz appear here. Click a tag to remove it, or pick more causes below.
+              Click a tag to remove it, or pick more causes below.
             </p>
             <div className="tag-input-row">
               <select
@@ -477,7 +477,7 @@ const Profile = ({ profile, onSave, defaultProfile, onTagsChange }) => {
                   />
                 ))
               ) : (
-                <p className="empty-message">No interests saved. Try the AI quiz on the Discover page!</p>
+                <p className="empty-message">No interests saved. </p>
               )}
             </div>
           </div>
@@ -512,7 +512,7 @@ const Profile = ({ profile, onSave, defaultProfile, onTagsChange }) => {
                   />
                 ))
               ) : (
-                <p className="empty-message">No skills saved. Try the AI quiz on the Discover page!</p>
+                <p className="empty-message">No skills saved. </p>
               )}
             </div>
           </div>

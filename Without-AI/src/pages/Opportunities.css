@@ -383,3 +383,26 @@
     width: 100%;
   }
 }
+
+.filter-clear-btn {
+  background-color: #fff;
+  color: #d32f2f;
+  border: 1px solid #d32f2f;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.filter-clear-btn:hover {
+  background-color: #ffebee;
+  box-shadow: 0 2px 5px rgba(211, 47, 47, 0.15);
+}
+
+.filter-clear-btn:active {
+  transform: translateY(1px);
+}
