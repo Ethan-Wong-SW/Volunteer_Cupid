@@ -1,0 +1,99 @@
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, #f4fff4 0%, #e9f2ea 35%, #ffffff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  width: min(100%, 440px);
+  background-color: #ffffff;
+  border: 1px solid #dfe6dd;
+  border-radius: 12px;
+  box-shadow: 0 25px 60px rgba(76, 175, 80, 0.15);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.login-heading {
+  text-align: center;
+}
+
+.login-eyebrow {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #4caf50;
+  margin: 0 0 0.5rem;
+}
+
+.login-heading h1 {
+  margin: 0;
+  color: #1f3d25;
+  font-size: 2rem;
+}
+
+.login-subtext {
+  margin: 0.6rem 0 0;
+  color: #516052;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0;
+  max-width: none;
+}
+
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: #2f3c2f;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cfdacc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.login-input:focus {
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+  outline: none;
+}
+
+.login-form button {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1rem;
+}
+
+.login-error {
+  margin: 0;
+  color: #c0392b;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-heading h1 {
+    font-size: 1.75rem;
+  }
+}
