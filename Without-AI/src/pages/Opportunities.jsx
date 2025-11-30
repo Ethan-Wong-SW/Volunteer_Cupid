@@ -103,25 +103,13 @@ const Opportunities = ({ profile = {}, onApply, onClearProfile }) => {
     return { skills: uniqueSkills, skillLabelMap: labelMap, uniqueInterests: sortedInterests };
   }, []);
 
-  // Logic to auto-select skill filter based on profile (optional)
-  useEffect(() => {
-    const profileSkills = (profile.skills || []).map((skill) => skill.toLowerCase());
-    if (!profileSkills.length) return;
-    // Only auto-set if filter is currently 'all' to avoid overriding user choice
-    if (skillFilter === 'all') { 
-        const matchedSkill = profileSkills.find((skill) => skills.includes(skill));
-        if (matchedSkill) {
-        setSkillFilter(matchedSkill);
-        }
-    }
-  }, [profile.skills, skills, skillFilter]);
-
 const filteredOpportunities = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const normalizedUserInterests = (profile.interests || []).map((interest) => interest.toLowerCase());
     const normalizedUserSkills = (profile.skills || []).map((s) => s.toLowerCase());
     
     const userInterestSet = new Set(normalizedUserInterests);
+    const userSkillSet = new Set(normalizedUserSkills);
 
     const scored = allOpportunities
       .map((opportunity, index) => ({ opportunity, index }))
@@ -176,43 +164,27 @@ const filteredOpportunities = useMemo(() => {
             }
         }
 
-        // 6. AI Profile Matching (OR Logic)
-        let matchesProfile = true;
-        // Only apply if user has profile tags AND hasn't manually overridden with dropdowns
-        // (Adjust this logic if you want profile matching to always apply)
-        const hasManualFilters = skillFilter !== 'all' || interestFilter !== 'all' || dateRange !== '' || locationFilter !== 'all' || searchTerm !== '';
-        
-        if (!hasManualFilters && (normalizedUserInterests.length > 0 || normalizedUserSkills.length > 0)) {
-             const hasInterestMatch = opportunity.interests?.some(i => normalizedUserInterests.includes(i.toLowerCase()));
-             const hasSkillMatch = opportunity.skills?.some(s => normalizedUserSkills.includes(s.toLowerCase()));
-             matchesProfile = hasInterestMatch || hasSkillMatch;
-        } else if (!hasManualFilters && normalizedUserInterests.length === 0 && normalizedUserSkills.length === 0) {
-            // If no profile and no manual filters, show all
-            matchesProfile = true;
-        }
-
-        return matchesLocation && matchesSkill && matchesInterestFilter && matchesDate && matchesProfile;
+        return matchesLocation && matchesSkill && matchesInterestFilter && matchesDate;
       })
       .map(({ opportunity, index }) => {
-        // Scoring logic for sorting (unchanged)
+        // Scoring logic for sorting
         const opportunityInterests = (opportunity.interests || []).map((interest) => interest.toLowerCase());
-        const overlap = opportunityInterests.filter((interest) => userInterestSet.has(interest));
-        const hasAll = normalizedUserInterests.length > 0 && normalizedUserInterests.every((interest) =>
-          opportunityInterests.includes(interest),
-        );
-        const category = normalizedUserInterests.length === 0
-          ? 1
-          : hasAll
-            ? 0
-            : overlap.length > 0
-              ? 1
-              : 2;
+        const opportunitySkills = (opportunity.skills || []).map((skill) => skill.toLowerCase());
+        
+        const interestOverlapCount = opportunityInterests.filter((interest) => userInterestSet.has(interest)).length;
+        const skillOverlapCount = opportunitySkills.filter((skill) => userSkillSet.has(skill)).length;
+        
+        const totalOverlap = interestOverlapCount + skillOverlapCount;
+
+        // We use category 0 for everything so that we rely purely on overlapCount for sorting.
+        // This ensures that opportunities with more matching tags (interests + skills) appear first.
+        const category = 0;
 
         return {
           opportunity,
           index,
           category,
-          overlapCount: overlap.length,
+          overlapCount: totalOverlap,
         };
       });
 
